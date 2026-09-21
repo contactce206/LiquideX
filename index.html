@@ -190,6 +190,9 @@ header{position:sticky;top:0;z-index:100;background:rgba(14,14,16,.9);backdrop-f
     </div>
     <div class="filters">
       <button class="filter-btn active" onclick="filterProducts('all',this)">Tous</button>
+      <button class="filter-btn" onclick="filterProducts('fruite',this)">🍓 Fruité</button>
+      <button class="filter-btn" onclick="filterProducts('frais',this)">❄️ Frais</button>
+      <button class="filter-btn" onclick="filterProducts('gourmand',this)">🍿 Gourmand</button>
       <button class="filter-btn" onclick="filterProducts('exclu',this)">⭐ Exclusifs</button>
     </div>
     <div class="grid" id="product-grid"></div>
@@ -303,24 +306,24 @@ const NIC_P  = {'0':0,'0.2':1,'0.3':1.5,'0.4':2,'0.6':3};
 const NIC_L  = {'0':'Sans nicotine','0.2':'0.2% +1€','0.3':'0.3% +1.50€','0.4':'0.4% +2€','0.6':'0.6% +3€'};
 
 const PRODUCTS = [
-  {id:1,  name:'Fraise',               exclu:false, img:'fraise'},
-  {id:2,  name:'Coca',                 exclu:false, img:'coca'},
-  {id:3,  name:'Cocktail fruité',      exclu:false, img:'cocktail'},
-  {id:4,  name:'Arc-en-ciel',          exclu:false, img:'rainbow'},
-  {id:5,  name:'Fresh Berries',        exclu:false, img:'fresh_berries'},
-  {id:6,  name:'Menthe Chlorophylle',  exclu:false, img:'menthe_chlo'},
-  {id:7,  name:'Mangue',               exclu:false, img:'mangue'},
-  {id:8,  name:'Pop-corn',             exclu:false, img:'popcorn'},
-  {id:9,  name:'Pomme verte',          exclu:false, img:'pomme_verte'},
-  {id:10, name:'Vanille',              exclu:false, img:'vanille'},
-  {id:11, name:'Ananas',               exclu:false, img:'ananas'},
-  {id:12, name:'Citron',               exclu:false, img:'citron'},
-  {id:13, name:'Framboise',            exclu:false, img:'framboise'},
-  {id:14, name:'Fruit frais des bois', exclu:false, img:'fruit_bois'},
-  {id:15, name:'Menthe glaciale',      exclu:false, img:'menthe_gla'},
-  {id:16, name:'Mystère rouge',        exclu:false, img:'mystere'},
-  {id:17, name:'Iceberg fruité',       exclu:true,  img:'iceberg'},
-  {id:18, name:'Red',                  exclu:true,  img:'red'},
+  {id:1,  name:'Fraise',               exclu:false, img:'fraise',       cats:['fruite']},
+  {id:2,  name:'Coca',                 exclu:false, img:'coca',         cats:['gourmand']},
+  {id:3,  name:'Cocktail fruité',      exclu:false, img:'cocktail',     cats:['fruite']},
+  {id:4,  name:'Arc-en-ciel',          exclu:false, img:'rainbow',      cats:['fruite']},
+  {id:5,  name:'Fresh Berries',        exclu:false, img:'fresh_berries',cats:['fruite','frais']},
+  {id:6,  name:'Menthe Chlorophylle',  exclu:false, img:'menthe_chlo',  cats:['frais']},
+  {id:7,  name:'Mangue',               exclu:false, img:'mangue',       cats:['fruite']},
+  {id:8,  name:'Pop-corn',             exclu:false, img:'popcorn',      cats:['gourmand']},
+  {id:9,  name:'Pomme verte',          exclu:false, img:'pomme_verte',  cats:['fruite']},
+  {id:10, name:'Vanille',              exclu:false, img:'vanille',      cats:['gourmand']},
+  {id:11, name:'Ananas',               exclu:false, img:'ananas',       cats:['fruite']},
+  {id:12, name:'Citron',               exclu:false, img:'citron',       cats:['fruite']},
+  {id:13, name:'Framboise',            exclu:false, img:'framboise',    cats:['fruite']},
+  {id:14, name:'Fruit frais des bois', exclu:false, img:'fruit_bois',   cats:['fruite','frais']},
+  {id:15, name:'Menthe glaciale',      exclu:false, img:'menthe_gla',   cats:['frais']},
+  {id:16, name:'Mystère rouge',        exclu:false, img:'mystere',      cats:['fruite']},
+  {id:17, name:'Iceberg fruité',       exclu:true,  img:'iceberg',      cats:['fruite','frais']},
+  {id:18, name:'Red',                  exclu:true,  img:'red',          cats:['fruite']},
 ];
 
 function price(p, ml, nic) { return (p.exclu ? EXCLU[ml] : BASE[ml]) + NIC_P[nic]; }
@@ -525,7 +528,7 @@ function closeSuccess(){ document.getElementById('success-modal').classList.remo
 function filterProducts(f,btn){
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const list = f==='exclu' ? PRODUCTS.filter(p=>p.exclu) : PRODUCTS;
+  const list = f==='all' ? PRODUCTS : f==='exclu' ? PRODUCTS.filter(p=>p.exclu) : PRODUCTS.filter(p=>p.cats.includes(f));
   document.getElementById('product-grid').innerHTML = list.map(p=>`
     <div class="card ${p.exclu?'exclu':''}" onclick="showProduct(${p.id})">
       <div class="card-img"><img src="${IMAGES[p.img]}" alt="${p.name}" loading="lazy"></div>
