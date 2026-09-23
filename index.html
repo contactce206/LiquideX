@@ -179,7 +179,10 @@ header{position:sticky;top:0;z-index:100;background:rgba(14,14,16,.9);backdrop-f
 
   <header>
     <div class="logo" onclick="showHome()">Liquide<span>X</span></div>
-    <button class="cart-btn" onclick="openCart()">🛒 Panier <span class="cart-count" id="cart-count">0</span></button>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="cart-btn" onclick="showAccount()">👤 Compte</button>
+      <button class="cart-btn" onclick="openCart()">🛒 Panier <span class="cart-count" id="cart-count">0</span></button>
+    </div>
   </header>
 
   <!-- HOME -->
@@ -209,6 +212,59 @@ header{position:sticky;top:0;z-index:100;background:rgba(14,14,16,.9);backdrop-f
   <div id="product-page">
     <button class="back-btn" onclick="showHome()">← Retour au catalogue</button>
     <div id="product-detail-content"></div>
+  </div>
+
+  <!-- ACCOUNT PAGE -->
+  <div id="account-page" style="display:none;max-width:480px;margin:0 auto;padding:48px 24px 80px">
+    <button class="back-btn" onclick="showHome()">← Retour au catalogue</button>
+
+    <!-- LOGGED OUT: setup profile -->
+    <div id="account-setup" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:20px">
+      <div style="text-align:center">
+        <div style="font-size:3rem;margin-bottom:12px">👤</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800">Créer mon profil</div>
+        <div style="color:var(--muted);font-size:.88rem;margin-top:6px">Vos infos seront mémorisées pour les prochaines commandes</div>
+      </div>
+      <div class="form-row"><label>Prénom / Nom *</label><input type="text" id="setup-name" placeholder="Ex: Jean Dupont"></div>
+      <div class="form-row"><label>Téléphone *</label><input type="tel" id="setup-phone" placeholder="Ex: 0491 23 45 67"></div>
+      <div class="form-row"><label>Email (optionnel)</label><input type="email" id="setup-email" placeholder="Ex: jean@email.com"></div>
+      <div id="setup-error" style="color:var(--danger);font-size:.82rem;display:none">Merci de remplir au moins le nom et le téléphone.</div>
+      <button onclick="saveProfile()" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-family:inherit;font-size:.95rem;font-weight:500;cursor:pointer">
+        Enregistrer mon profil
+      </button>
+    </div>
+
+    <!-- LOGGED IN: show profile -->
+    <div id="account-profile" style="display:none;flex-direction:column;gap:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:20px">
+        <div style="text-align:center">
+          <div style="font-size:3rem;margin-bottom:12px">👤</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800" id="profile-name-title"></div>
+          <div style="color:#4ade80;font-size:.85rem;margin-top:6px">✅ Connecté · profil enregistré</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px">
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:3px">NOM</div>
+            <div style="font-weight:500;font-size:.9rem" id="profile-name"></div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px">
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:3px">TÉLÉPHONE</div>
+            <div style="font-weight:500;font-size:.9rem" id="profile-phone"></div>
+          </div>
+          <div id="profile-email-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:none">
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:3px">EMAIL</div>
+            <div style="font-weight:500;font-size:.9rem" id="profile-email"></div>
+          </div>
+        </div>
+        <button onclick="editProfile()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:11px;font-family:inherit;font-size:.9rem;cursor:pointer">
+          ✏️ Modifier mes informations
+        </button>
+        <button onclick="logout()" style="background:var(--danger);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-family:inherit;font-size:.95rem;font-weight:500;cursor:pointer">
+          Se déconnecter
+        </button>
+        <p style="color:var(--muted);font-size:.75rem;text-align:center;line-height:1.5">En vous déconnectant, le code d'accès et votre profil seront supprimés de cet appareil.</p>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -329,10 +385,20 @@ const PRODUCTS = [
 function price(p, ml, nic) { return (p.exclu ? EXCLU[ml] : BASE[ml]) + NIC_P[nic]; }
 
 // ── LOCK ──
+(function() {
+  try {
+    if(localStorage.getItem('lx_auth') === 'ok') {
+      document.getElementById('lock').style.display = 'none';
+      document.getElementById('site').style.display = 'block';
+    }
+  } catch(e) {}
+})();
+
 document.getElementById('lock-btn').onclick = checkPass;
 document.getElementById('lock-input').addEventListener('keydown', e => { if(e.key==='Enter') checkPass(); });
 function checkPass() {
   if(document.getElementById('lock-input').value === 'liquidex2025') {
+    try { localStorage.setItem('lx_auth','ok'); } catch(e) {}
     document.getElementById('lock').style.display = 'none';
     document.getElementById('site').style.display = 'block';
   } else {
@@ -345,7 +411,80 @@ function checkPass() {
 function showHome() {
   document.getElementById('home-page').style.display = 'block';
   document.getElementById('product-page').style.display = 'none';
+  document.getElementById('account-page').style.display = 'none';
   window.scrollTo(0,0);
+}
+
+function showAccount() {
+  document.getElementById('home-page').style.display = 'none';
+  document.getElementById('product-page').style.display = 'none';
+  document.getElementById('account-page').style.display = 'block';
+  renderAccountPage();
+  window.scrollTo(0,0);
+}
+
+function renderAccountPage() {
+  const profile = getProfile();
+  if(profile) {
+    document.getElementById('account-setup').style.display = 'none';
+    document.getElementById('account-profile').style.display = 'flex';
+    document.getElementById('profile-name-title').textContent = profile.name;
+    document.getElementById('profile-name').textContent = profile.name;
+    document.getElementById('profile-phone').textContent = profile.phone;
+    if(profile.email) {
+      document.getElementById('profile-email-row').style.display = 'block';
+      document.getElementById('profile-email').textContent = profile.email;
+    } else {
+      document.getElementById('profile-email-row').style.display = 'none';
+    }
+  } else {
+    document.getElementById('account-setup').style.display = 'flex';
+    document.getElementById('account-profile').style.display = 'none';
+  }
+}
+
+function getProfile() {
+  try {
+    const p = localStorage.getItem('lx_profile');
+    return p ? JSON.parse(p) : null;
+  } catch(e) { return null; }
+}
+
+function saveProfile() {
+  const name  = document.getElementById('setup-name').value.trim();
+  const phone = document.getElementById('setup-phone').value.trim();
+  const email = document.getElementById('setup-email').value.trim();
+  if(!name || !phone) {
+    document.getElementById('setup-error').style.display = 'block';
+    return;
+  }
+  try {
+    localStorage.setItem('lx_profile', JSON.stringify({name, phone, email}));
+  } catch(e) {}
+  document.getElementById('setup-error').style.display = 'none';
+  renderAccountPage();
+}
+
+function editProfile() {
+  const profile = getProfile();
+  document.getElementById('account-profile').style.display = 'none';
+  document.getElementById('account-setup').style.display = 'flex';
+  if(profile) {
+    document.getElementById('setup-name').value = profile.name;
+    document.getElementById('setup-phone').value = profile.phone;
+    document.getElementById('setup-email').value = profile.email || '';
+  }
+}
+
+function logout() {
+  try {
+    localStorage.removeItem('lx_auth');
+    localStorage.removeItem('lx_profile');
+  } catch(e) {}
+  document.getElementById('site').style.display = 'none';
+  document.getElementById('lock').style.display = 'flex';
+  document.getElementById('lock-input').value = '';
+  document.getElementById('lock-error').style.display = 'none';
 }
 
 function showProduct(id) {
@@ -401,6 +540,7 @@ function showProduct(id) {
 
   render();
   document.getElementById('home-page').style.display = 'none';
+  document.getElementById('account-page').style.display = 'none';
   document.getElementById('product-page').style.display = 'block';
   window.scrollTo(0,0);
 }
@@ -498,7 +638,17 @@ function cartUI() {
 
 function openCart()  { document.getElementById('cart-overlay').classList.add('open'); document.getElementById('cart-drawer').classList.add('open'); }
 function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); document.getElementById('cart-drawer').classList.remove('open'); }
-function showOrderForm() { document.getElementById('checkout-btn').style.display='none'; document.getElementById('order-form').style.display='flex'; }
+function showOrderForm() {
+  document.getElementById('checkout-btn').style.display='none';
+  document.getElementById('order-form').style.display='flex';
+  const profile = getProfile();
+  if(profile) {
+    const nameEl = document.getElementById('field-name');
+    const phoneEl = document.getElementById('field-phone');
+    if(!nameEl.value) nameEl.value = profile.name;
+    if(!phoneEl.value) phoneEl.value = profile.phone;
+  }
+}
 
 // ── SUBMIT ──
 async function submitOrder() {
