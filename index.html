@@ -160,6 +160,40 @@ header{position:sticky;top:0;z-index:100;background:rgba(14,14,16,.9);backdrop-f
   .filters{padding:0 12px 24px}
   header{padding:0 12px}
 }
+
+  /* DROPDOWN */
+  #dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-width: 210px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    z-index: 150;
+  }
+  #dropdown-menu.open { display: flex; }
+  .dropdown-item {
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: 14px 18px;
+    font-family: inherit;
+    font-size: .92rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .dropdown-item:last-child { border-bottom: none; }
+  .dropdown-item:hover { background: var(--surface2); }
 </style>
 </head>
 <body>
@@ -179,9 +213,14 @@ header{position:sticky;top:0;z-index:100;background:rgba(14,14,16,.9);backdrop-f
 
   <header>
     <div class="logo" onclick="showHome()">Liquide<span>X</span></div>
-    <div style="display:flex;gap:10px;align-items:center">
-      <button class="cart-btn" onclick="showAccount()">👤 Compte</button>
-      <button class="cart-btn" onclick="openCart()">🛒 Panier <span class="cart-count" id="cart-count">0</span></button>
+    <div style="position:relative">
+      <button class="cart-btn" id="menu-toggle" onclick="toggleMenu()">
+        ☰ <span class="cart-count" id="cart-count">0</span>
+      </button>
+      <div id="dropdown-menu">
+        <button class="dropdown-item" onclick="showAccount();closeMenu()">👤 Mon compte</button>
+        <button class="dropdown-item" onclick="openCart();closeMenu()">🛒 Mon panier <span id="cart-count-drop" style="background:var(--accent);color:#fff;border-radius:99px;padding:1px 7px;font-size:.72rem;font-weight:600;margin-left:4px">0</span></button>
+      </div>
     </div>
   </header>
 
@@ -408,6 +447,21 @@ function checkPass() {
 }
 
 // ── NAVIGATION ──
+function toggleMenu() {
+  document.getElementById('dropdown-menu').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('dropdown-menu').classList.remove('open');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const toggle = document.getElementById('menu-toggle');
+  const menu = document.getElementById('dropdown-menu');
+  if(toggle && menu && !toggle.contains(e.target) && !menu.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
 function showHome() {
   document.getElementById('home-page').style.display = 'block';
   document.getElementById('product-page').style.display = 'none';
@@ -612,6 +666,7 @@ function cartUI() {
   const total = cart.reduce((s,i)=>s+i.total,0);
   const count = cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById('cart-count').textContent = count;
+  document.getElementById('cart-count-drop').textContent = count;
   document.getElementById('total-amount').textContent = total+' €';
   const el = document.getElementById('drawer-items');
   if(cart.length===0) {
